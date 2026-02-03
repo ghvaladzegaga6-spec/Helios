@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helios Scientific Forum</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --primary: #003366; --accent: #ffcc00; --bg: #f4f7f6; --white: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 700px; background: var(--white); margin: 20px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { max-width: 150px; height: auto; margin-bottom: 10px; }
+        h1 { color: var(--primary); margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
+        .hidden { display: none; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; background: var(--primary); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 16px; }
+        button:hover { background: #002244; transform: translateY(-1px); }
+        .btn-delete { background: #dc3545; width: auto; padding: 6px 12px; font-size: 12px; margin-top: 10px; }
+        .response-card { background: #f8f9fa; padding: 15px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--accent); font-size: 14px; }
+        .admin-link { text-align: center; margin-top: 40px; font-size: 12px; color: #bbb; cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <img src="HElios.jpg" alt="Helios Logo" class="logo">
+        <h1>Helios Scientific Forum</h1>
+        <p style="color: #666;">ანონიმური სამეცნიერო კვლევის პლატფორმა</p>
+    </header>
+
+    <div id="user-auth-section">
+        <h3 style="text-align: center;">ავტორიზაცია</h3>
+        <div class="card">
+            <label>ასაკი:</label>
+            <input type="number" id="user-age" placeholder="მაგ: 25">
+            <label>სქესი:</label>
+            <select id="user-gender">
+                <option value="მამრობითი">მამრობითი</option>
+                <option value="მდედრობითი">მდედრობითი</option>
+                <option value="სხვა">სხვა</option>
+            </select>
+            <button onclick="startForum()">ფორუმზე შესვლა</button>
+        </div>
+    </div>
+
+    <div id="forum-section" class="hidden">
+        <div id="questions-list"></div>
+        <button onclick="location.reload()" style="background:#666; margin-top:20px;">გამოსვლა</button>
+    </div>
+
+    <div id="admin-auth" class="hidden">
+        <h3>ადმინ შესვლა</h3>
+        <input type="password" id="admin-pass" placeholder="პაროლი">
+        <button onclick="loginAdmin()">შესვლა</button>
+    </div>
+
+    <div id="admin-panel" class="hidden">
+        <h2>ადმინისტრირება</h2>
+        <div class="card">
+            <h4>ახალი კითხვის დამატება</h4>
+            <textarea id="new-q-text" placeholder="ჩაწერეთ კითხვა..."></textarea>
+            <button onclick="addNewQuestion()">დამატება</button>
+        </div>
+        <div id="admin-data-display"></div>
+        <button onclick="location.reload()" style="background:#666;">დახურვა</button>
+    </div>
+
+    <div class="admin-link" onclick="showAdminAuth()">Admin Access</div>
+</div>
+
+<script>
+    // შენი Firebase კონფიგურაცია
+    const firebaseConfig = {
+        apiKey: "AIzaSyALpHIp1BG-vgogU7Q-GlKT6F-KvoiMi5o",
+        authDomain: "helios-forum.firebaseapp.com",
+        projectId: "helios-forum",
+        storageBucket: "helios-forum.firebasestorage.app",
+        messagingSenderId: "883406914873",
+        appId: "1:883406914873:web:30326aecef71c617f954e8",
+        measurementId: "G-EG4YWL0T6Q"
+    };
+
+    // ინიციალიზაცია
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentAge, currentGender;
+
+    // ფორუმზე შესვლა
+    function startForum() {
+        currentAge = document.getElementById('user-age').value;
+        currentGender = document.getElementById('user-gender').value;
+        if (!currentAge) { alert("გთხოვთ მიუთითოთ ასაკი"); return; }
+        
+        document.getElementById('user-auth-section').classList.add('hidden');
+        document.getElementById('forum-section').classList.remove('hidden');
+        loadQuestions();
+    }
+
+    // კითხვების წამოღება
+    function loadQuestions() {
+        db.ref('questions').on('value', (snapshot) => {
+            const list = document.getElementById('questions-list');
+            list.innerHTML = "<h3>აქტიური კითხვები</h3>";
+            snapshot.forEach((child) => {
+                const qText = child.val();
+                const qId = child.key;
+                list.innerHTML += `
+                    <div class="card">
+                        <p><strong>${qText}</strong></p>
+                        <textarea id="ans-${qId}" placeholder="თქვენი პასუხი..."></textarea>
+                        <button onclick="sendAnswer('${qId}', '${qText}')">გაგზავნა</button>
+                    </div>`;
+            });
+        });
+    }
+
+    // პასუხის გაგზავნა
+    function sendAnswer(qId, qText) {
+        const answerField = document.getElementById(`ans-${qId}`);
+        if (!answerField.value) { alert("პასუხი ცარიელია"); return; }
+
+        db.ref('responses').push({
+            question: qText,
+            answer: answerField.value,
+            age: currentAge,
+            gender: currentGender,
+            timestamp: new Date().toLocaleString()
+        });
+
+        alert("თქვენი პასუხი წარმატებით გაიგზავნა!");
+        answerField.value = "";
+    }
+
+    // ადმინ ფუნქციები
+    function showAdminAuth() {
+        document.getElementById('user-auth-section').classList.add('hidden');
+        document.getElementById('forum-section').classList.add('hidden');
+        document.getElementById('admin-auth').classList.remove('hidden');
+    }
+
+    function loginAdmin() {
+        if (document.getElementById('admin-pass').value === "helios123") {
+            document.getElementById('admin-auth').classList.add('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+            loadAdminPanel();
+        } else { alert("არასწორი პაროლი"); }
+    }
+
+    function addNewQuestion() {
+        const qText = document.getElementById('new-q-text').value;
+        if (qText) {
+            db.ref('questions').push(qText);
+            document.getElementById('new-q-text').value = "";
+        }
+    }
+
+    function loadAdminPanel() {
+        // კითხვების მართვა და პასუხების ნახვა ერთად
+        db.ref('questions').on('value', (qSnap) => {
+            const display = document.getElementById('admin-data-display');
+            display.innerHTML = "<h4>კითხვების მართვა:</h4>";
+            
+            qSnap.forEach(qChild => {
+                display.innerHTML += `
+                    <div class="card" style="border-left: 4px solid red;">
+                        <span>${qChild.val()}</span><br>
+                        <button class="btn-delete" onclick="deleteQuestion('${qChild.key}')">კითხვის წაშლა</button>
+                    </div>`;
+            });
+
+            db.ref('responses').on('value', (rSnap) => {
+                display.innerHTML += "<h4>მიღებული პასუხები:</h4>";
+                rSnap.forEach(rChild => {
+                    const data = rChild.val();
+                    display.innerHTML += `
+                        <div class="response-card">
+                            <strong>კითხვა:</strong> ${data.question}<br>
+                            <strong>პასუხი:</strong> ${data.answer}<br>
+                            <small>ასაკი: ${data.age} | სქესი: ${data.gender} | ${data.timestamp}</small>
+                        </div>`;
+                });
+            });
+        });
+    }
+
+    function deleteQuestion(id) {
+        if (confirm("ნამდვილად გსურთ ამ კითხვის წაშლა?")) {
+            db.ref('questions/' + id).remove();
+        }
+    }
+</script>
+
+</body>
+</html>
