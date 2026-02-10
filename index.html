@@ -6,35 +6,147 @@
     <title>Helios Scientific Forum</title>
     <link rel="icon" type="image/jpg" href="HElios.jpg">
     
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #003366; --accent: #ffcc00; --bg: #f4f7f6; --white: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 700px; background: var(--white); margin: 20px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { max-width: 150px; height: auto; margin-bottom: 10px; }
-        h1 { color: var(--primary); margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
-        .hidden { display: none !important; }
-        .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; background: var(--primary); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 16px; }
-        button:hover { background: #002244; transform: translateY(-1px); }
-        .btn-delete { background: #dc3545; width: auto; padding: 6px 12px; font-size: 12px; margin-top: 10px; }
-        .response-card { background: #f8f9fa; padding: 15px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--accent); font-size: 14px; }
-        .admin-link { text-align: center; margin-top: 40px; font-size: 12px; color: #bbb; cursor: pointer; text-decoration: underline; }
+        :root { 
+            --primary: #0f172a; 
+            --accent: #3b82f6; 
+            --glass: rgba(255, 255, 255, 0.85);
+            --text: #1e293b;
+        }
 
-        /* მოდალური ფანჯრის სტილები */
+        body { 
+            font-family: 'Noto Sans Georgian', sans-serif; 
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            color: var(--text);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 800px; 
+            background: var(--glass); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            margin: 40px 20px; 
+            padding: 50px; 
+            border-radius: 30px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+        }
+
+        .logo { 
+            max-width: 130px; 
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            margin-bottom: 20px;
+        }
+
+        h1 { 
+            color: var(--primary); 
+            font-size: 32px; 
+            letter-spacing: -1px;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .hidden { display: none !important; }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.6); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        input, select, textarea { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border: 2px solid transparent; 
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #fff;
+        }
+
+        button { 
+            width: 100%; 
+            background: var(--primary); 
+            color: white; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.3s ease; 
+            font-size: 17px; 
+        }
+
+        button:hover { 
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete { background: #ff4757; width: auto; padding: 10px 20px; font-size: 13px; margin-top: 10px; }
+
+        .response-card { 
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px; 
+            margin-top: 15px; 
+            border-radius: 15px; 
+            border-left: 6px solid var(--accent); 
+        }
+
+        .admin-link { 
+            text-align: center; 
+            margin-top: 50px; 
+            font-size: 14px; 
+            color: var(--primary); 
+            opacity: 0.6;
+            cursor: pointer; 
+        }
+
         #research-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: flex; justify-content: center;
-            align-items: center; z-index: 9999;
+            background: rgba(15, 23, 42, 0.9); display: flex; justify-content: center;
+            align-items: center; z-index: 9999; backdrop-filter: blur(10px);
         }
         .modal-content {
-            background: white; padding: 30px; border-radius: 15px;
-            max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto;
-            text-align: left; box-shadow: 0 5px 25px rgba(0,0,0,0.5); line-height: 1.6;
+            background: white; padding: 45px; border-radius: 30px;
+            max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            line-height: 1.6;
         }
         .modal-content h2 { color: var(--primary); margin-top: 0; text-align: center; font-size: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .modal-content p { font-size: 14px; color: #333; margin-bottom: 20px; white-space: pre-line; }
@@ -60,7 +172,7 @@
     <header>
         <img src="HElios.jpg" alt="Helios Logo" class="logo">
         <h1>Helios Scientific Forum</h1>
-        <p style="color: #666;">ანონიმური გამოკითხვა</p>
+        <p style="color: #666; margin-top:10px;">ანონიმური გამოკითხვა</p>
     </header>
 
     <div id="user-auth-section">
@@ -85,15 +197,17 @@
 
     <div id="admin-auth" class="hidden">
         <h3>ადმინ შესვლა</h3>
-        <input type="password" id="admin-pass" placeholder="პაროლი">
-        <button onclick="loginAdmin()">შესვლა</button>
+        <div class="card">
+            <input type="password" id="admin-pass" placeholder="პაროლი">
+            <button onclick="loginAdmin()">შესვლა</button>
+        </div>
     </div>
 
     <div id="admin-panel" class="hidden">
         <h2>ადმინისტრირება</h2>
         <div class="card">
             <h4>ახალი კითხვის დამატება</h4>
-            <textarea id="new-q-text" placeholder="ჩაწერეთ კითხვა..."></textarea>
+            <textarea id="new-q-text" rows="3" placeholder="ჩაწერეთ კითხვა..."></textarea>
             <button onclick="addNewQuestion()">დამატება</button>
         </div>
         <div id="admin-data-display"></div>
@@ -104,12 +218,10 @@
 </div>
 
 <script>
-    // მოდალური ფანჯრის დახურვის ფუნქცია
     function closeModal() {
         document.getElementById('research-modal').style.display = 'none';
     }
 
-    // Firebase კონფიგურაცია
     const firebaseConfig = {
         apiKey: "AIzaSyALpHIp1BG-vgogU7Q-GlKT6F-KvoiMi5o",
         authDomain: "helios-forum.firebaseapp.com",
@@ -155,15 +267,11 @@
     function sendAnswer(qId, qText) {
         const answerField = document.getElementById(`ans-${qId}`);
         if (!answerField.value) { alert("პასუხი ცარიელია"); return; }
-
         db.ref('responses').push({
-            question: qText,
-            answer: answerField.value,
-            age: currentAge,
-            gender: currentGender,
+            question: qText, answer: answerField.value,
+            age: currentAge, gender: currentGender,
             timestamp: new Date().toLocaleString()
         });
-
         alert("თქვენი პასუხი წარმატებით გაიგზავნა!");
         answerField.value = "";
     }
@@ -194,10 +302,9 @@
         db.ref('questions').on('value', (qSnap) => {
             const display = document.getElementById('admin-data-display');
             display.innerHTML = "<h4>კითხვების მართვა:</h4>";
-            
             qSnap.forEach(qChild => {
                 display.innerHTML += `
-                    <div class="card" style="border-left: 4px solid red;">
+                    <div class="card" style="border-left: 6px solid #ff4757;">
                         <span>${qChild.val()}</span><br>
                         <button class="btn-delete" onclick="deleteQuestion('${qChild.key}')">კითხვის წაშლა</button>
                     </div>`;
@@ -219,9 +326,7 @@
     }
 
     function deleteQuestion(id) {
-        if (confirm("ნამდვილად გსურთ ამ კითხვის წაშლა?")) {
-            db.ref('questions/' + id).remove();
-        }
+        if (confirm("ნამდვილად გსურთ ამ კითხვის წაშლა?")) { db.ref('questions/' + id).remove(); }
     }
 </script>
 
